@@ -168,8 +168,6 @@ async def on_command_error(exception, context):
     Override the default discord.py on_command_error
     to log our errors to a file in the errors
     folder.
-
-    @TODO : better error logging
     """
 
     if hasattr(context.command, "on_error"):
@@ -189,6 +187,10 @@ async def on_command_error(exception, context):
         return
 
     if isinstance(exception, commands.MissingRequiredArgument):
+        print('Ignoring exception in command {}'.format(context.command), file=sys.stderr)
+        return
+
+    if isinstance(exception, commands.CommandOnCooldown):
         print('Ignoring exception in command {}'.format(context.command), file=sys.stderr)
         return
 
