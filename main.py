@@ -92,7 +92,8 @@ async def on_message(message):
             await CLIENT.process_commands(message)
         else:
             can_use = BotResources().check_accepted(message.author.id)
-            message_channel_valid = BotResources().get_tos_channel_valid(message.server.id)
+            if not message.channel.is_private:
+                message_channel_valid = BotResources().get_tos_channel_valid(message.server.id)
             if can_use:
                 await CLIENT.process_commands(message)
             elif not can_use and message_channel_valid:
@@ -175,25 +176,26 @@ async def on_command_error(exception, context):
         return
 
     if isinstance(exception, commands.CommandNotFound):
-        print('Ignoring exception in command {}'.format(context.command), file=sys.stderr)
+        print('Ignoring CommandNotFound in command {}'.format(context.command), file=sys.stderr)
         return
 
     if isinstance(exception, commands.DisabledCommand):
-        print('Ignoring exception in command {}'.format(context.command), file=sys.stderr)
+        print('Ignoring DisabledCommand in command {}'.format(context.command), file=sys.stderr)
         return
 
     if isinstance(exception, commands.NoPrivateMessage):
-        print('Ignoring exception in command {}'.format(context.command), file=sys.stderr)
+        print('Ignoring NoPrivateMessage in command {}'.format(context.command), file=sys.stderr)
         return
 
-    if isinstance(exception, commands.MissingRequiredArgument):
-        print('Ignoring exception in command {}'.format(context.command), file=sys.stderr)
+    if isinstance(exception, commands.MissingRequiredArgument) or \
+    isinstance(exception, commands.BadArgument):
+        print('Ignoring MissingRequiredArgument/BadArgument in command {}'.format(context.command), file=sys.stderr)
         return
 
     if isinstance(exception, commands.CommandOnCooldown):
-        print('Ignoring exception in command {}'.format(context.command), file=sys.stderr)
+        print('Ignoring CommandOnCooldown in command {}'.format(context.command), file=sys.stderr)
         return
-
+    
     if SHOW_DEBUG:
         traceback.print_exception(
             type(exception),

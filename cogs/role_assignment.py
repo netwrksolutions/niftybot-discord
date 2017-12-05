@@ -123,7 +123,7 @@ class RoleAssignor():
         :add_or_remove: (str) [add, remove] passed in string to determine
         if a role is being added or removed
 
-        :role_id: the discord snowflake ID for the role
+        :role_id: the discord snowflake ID for the role, the pinged username
         :member: empty discord.Member object
         """
         member = ctx.message.author
@@ -139,6 +139,11 @@ class RoleAssignor():
                 'role_list'
             )
 
+            # Hacky fix for when mentioning the role to strip stuff out
+            role_id = role_id.replace('<@&', '')
+            role_id = role_id.replace('>', '')
+            role_id = role_id.strip()
+
             if add_or_remove == 'add':
                 if not contains_word(current_role_list, role_id):
                     if current_role_list == 'NOT_SET':
@@ -150,17 +155,18 @@ class RoleAssignor():
 
             if add_or_remove == 'remove':
                 if contains_word(current_role_list, role_id):
-                    updated_role_list = current_role_list.strip(' ' + role_id + ' ')
+                    updated_role_list = current_role_list.replace(role_id, '')
 
                 if updated_role_list.isspace() or len(updated_role_list) == 0:
                     updated_role_list = 'NOT_SET'
 
             filename = ctx.message.server.id
-            await ConfigCommands(self.bot).update_config(
+            await ConfigCommands(self.bot).update_config_file(
                 filename,
                 'RoleAssignment',
                 'role_list',
-                updated_role_list.strip()
+                updated_role_list.strip(),
+                ctx.message
             )
 
 @commands.command(pass_context=True, no_pm=False, name='rolechannel')
